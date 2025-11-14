@@ -10,7 +10,7 @@ interface BookCardProps {
 
 export function BookCard({ book, isPurchased, onPurchase, onView }: BookCardProps) {
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition group">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-xl transition group">
       <div className="aspect-[3/4] bg-gradient-to-br from-slate-200 to-slate-300 relative overflow-hidden">
         {book.cover_url ? (
           <img
@@ -32,26 +32,26 @@ export function BookCard({ book, isPurchased, onPurchase, onView }: BookCardProp
       </div>
 
       <div className="p-5">
-        <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-1">{book.title}</h3>
-        <p className="text-sm text-gray-600 mb-3">{book.author}</p>
+        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1 line-clamp-1">{book.title}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{book.author}</p>
 
         {book.description && (
-          <p className="text-sm text-gray-500 mb-4 line-clamp-2">{book.description}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">{book.description}</p>
         )}
 
         {book.genre && (
-          <span className="inline-block px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-full mb-4">
+          <span className="inline-block px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs rounded-full mb-4">
             {book.genre}
           </span>
         )}
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <span className="text-2xl font-bold text-gray-900">${book.price.toFixed(2)}</span>
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+          <span className="text-2xl font-bold text-gray-900 dark:text-white">${book.price.toFixed(2)}</span>
 
           {isPurchased ? (
             <button
               onClick={() => onView?.(book)}
-              className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition font-medium text-sm"
+              className="px-4 py-2 bg-slate-600 hover:bg-slate-700 dark:bg-slate-500 dark:hover:bg-slate-600 text-white rounded-lg transition font-medium text-sm"
             >
               Read Now
             </button>

@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { Book, Purchase } from '../types/database';
 import { useAuth } from '../contexts/AuthContext';
 import { BookCard } from './BookCard';
+import { DarkModeToggle } from './DarkModeToggle';
 import { Search, Filter, LogOut, Upload, Library } from 'lucide-react';
 
 export function BookStore() {
@@ -10,7 +11,7 @@ export function BookStore() {
   const [books, setBooks] = useState<Book[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState<string>('all');
+  const [selectedGenre, setSelectedGenre] = useState<string | number>('all');
   const [view, setView] = useState<'store' | 'library' | 'upload'>('store');
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +22,7 @@ export function BookStore() {
 
   const loadBooks = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('books')
       .select('*')
       .order('created_at', { ascending: false });
@@ -87,24 +88,25 @@ export function BookStore() {
     purchases.some(p => p.book_id === book.id)
   );
 
-  const genres = Array.from(new Set(books.map(b => b.genre).filter(Boolean)));
+  const genres = Array.from(new Set(books.map(b => b.genre).filter((genre): genre is string => Boolean(genre))));
 
   const canUpload = profile?.role === 'author' || profile?.role === 'admin';
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
+      <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">CloudBooks Store</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">CloudBooks Store</h1>
 
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-300">
                 {profile?.full_name || profile?.email}
               </span>
+              <DarkModeToggle />
               <button
                 onClick={() => signOut()}
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900 transition"
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition"
               >
                 <LogOut className="w-4 h-4" />
                 Sign Out
@@ -116,7 +118,7 @@ export function BookStore() {
             <button
               onClick={() => setView('store')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
-                view === 'store' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                view === 'store' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
               <Search className="w-4 h-4" />
@@ -126,7 +128,7 @@ export function BookStore() {
             <button
               onClick={() => setView('library')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
-                view === 'library' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                view === 'library' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
               <Library className="w-4 h-4" />
@@ -137,7 +139,7 @@ export function BookStore() {
               <button
                 onClick={() => setView('upload')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
-                  view === 'upload' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  view === 'upload' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
                 <Upload className="w-4 h-4" />
@@ -159,16 +161,16 @@ export function BookStore() {
                   placeholder="Search books by title or author..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
 
               <div className="relative">
                 <Filter className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <select
-                  value={selectedGenre}
+                  value={String(selectedGenre)}
                   onChange={(e) => setSelectedGenre(e.target.value)}
-                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white min-w-[200px]"
+                  className="pl-10 pr-8 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white min-w-[200px]"
                 >
                   <option value="all">All Genres</option>
                   {genres.map(genre => (
@@ -204,12 +206,12 @@ export function BookStore() {
 
         {view === 'library' && (
           <>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">My Library</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">My Library</h2>
             {purchasedBooks.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-xl">
-                <Library className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg mb-2">Your library is empty</p>
-                <p className="text-gray-400 mb-6">Start browsing the store to add books</p>
+              <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
+                <Library className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">Your library is empty</p>
+                <p className="text-gray-400 dark:text-gray-500 mb-6">Start browsing the store to add books</p>
                 <button
                   onClick={() => setView('store')}
                   className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
@@ -283,94 +285,94 @@ function UploadBookForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Upload New Book</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Upload New Book</h2>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
           <input
             type="text"
             required
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Author *</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Author *</label>
           <input
             type="text"
             required
             value={formData.author}
             onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
           <textarea
             rows={3}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Price *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price *</label>
             <input
               type="number"
               step="0.01"
               required
               value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Genre</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Genre</label>
             <input
               type="text"
               value={formData.genre}
               onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Cover URL</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cover URL</label>
           <input
             type="url"
             value={formData.cover_url}
             onChange={(e) => setFormData({ ...formData, cover_url: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             placeholder="https://example.com/cover.jpg"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">File URL</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">File URL</label>
           <input
             type="url"
             value={formData.file_url}
             onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             placeholder="https://example.com/book.pdf"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Published Date</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Published Date</label>
           <input
             type="date"
             value={formData.published_date}
             onChange={(e) => setFormData({ ...formData, published_date: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
 
